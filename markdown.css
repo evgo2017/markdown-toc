@@ -77,14 +77,14 @@
   font-size: 1rem;
 }
 .markdown-body a {
-  color: #0099ff;
+  color: #09f;
   margin: 0 2px;
   padding: 0;
   vertical-align: baseline;
   text-decoration: none;
 }
 .markdown-body a:hover {
-  color: #ff6600;
+  color: #f60;
 }
 
 /*

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Markdown-Toc</title>
+  <script src="https://cdn.bootcss.com/marked/0.6.2/marked.min.js"></script>
+  <script src="./markdown-toc.js"></script>
+  <script src="./data.js"></script>
+  <!--  -->
+  <link rel="stylesheet" href="./markdown.css">
+  <style>
+    /* 对 markdown-toc 设置高度才会有滚动条，有随内容滚动的效果 */
+    .markdown-toc-fixed {
+      position: fixed;
+      height: 70%;
+      overflow-y: auto;
+      width: calc(25%);
+    }
+  </style>
+</head>
+<body>
+<div style="display: flex;">
+  <div id="markdown-body" class="markdown-body" style="width: calc(75%)"></div>
+  <div>
+    <div id="markdown-toc" class="markdown-toc markdown-toc-fixed"></div>
+  </div>
+</div>
+</body>
+<script>
+  // 通过 marked.js 拿到解析后的信息
+  let md = getMarkdownHTML(data);
+  // Markdown 的 HTML
+  document.getElementById('markdown-body').innerHTML = md.html
+  // Markdown 目录的 HTML
+  document.getElementById('markdown-toc').innerHTML = markdownToc.toHTML(md.tocTokens)
+
+  // 如果需要滚动，则进行初始化，同时监听（添加与取消自定义）,Chrome可正常运行，其他浏览器未测试
+  // 各部分的 id 可以自己重设，此文件中为默认值
+  markdownToc.chain.init()
+  window.addEventListener("scroll", function () {
+    markdownToc.chain.scroll()
+  })
+
+  // 对 marked.js 的标题设置，不影响其他元素解析
+  function getMarkdownHTML(mdString) {
+    let renderer = new marked.Renderer()
+    /* 核心 - Start */
+    renderer.tocTokens = [] // 目录信息
+    renderer.heading = function (text, level, raw, slugger) {
+      if (this.options.headerIds) {
+        let anchor = this.options.headerPrefix + slugger.slug(raw)
+        this.tocTokens.push({text, level, anchor})
+        return `<h${level} id="${anchor}" class="markdown-body-anchor" index="${this.tocTokens.length - 1}">${text}</h${level}>`
+      }
+      return `<h${level}>${text}</h${level}>`
+    }
+    /* End */
+    marked.setOptions({
+      renderer: renderer,
+      headerPrefix: 'md' // 可有可无，只是避免重复
+    })
+    return {
+      html: marked(mdString),
+      tocTokens: renderer.tocTokens
+    }
+  }
+</script>
+</html>
