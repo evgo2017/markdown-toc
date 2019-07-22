@@ -1,10 +1,14 @@
 # markdown-toc
 
-[在线浏览](<https://evgo2017.github.io/markdown-toc/> ) ，建议 PC 端，Chrome 最佳
+选择的是 marked.js 库进行解析，配合 highlight.js 进行代码高亮。
 
-> 个人网站的使用： [个人网站/关于](<https://evgo2017.com/about> ) 
+[在线浏览](<https://evgo2017.github.io/markdown-toc/> ) ，[效果实例](<https://evgo2017.com/about>)，建议 PC 端，Chrome 最佳
 
-## 功能
+## 一、用法
+
+直接引入 `markdown-toc.js` 即可。`index.html` 为使用示例。
+
+## 二、功能
 
 - [x] 生成 Markdown 的目录
 - [x] 浏览文章内容时：
@@ -18,24 +22,50 @@
   - [x] 目录标题颜色切换
   - [x] 修改 `window.location.hash`
 - [x] 均平滑滚动（smooth）
-- [x] Markdown CSS
+- [x] Markdown CSS（ `zhangjikai/markdown-css` && `github-markdown-css` ）
+  - [x] 修改与整理：`.markdown-body`
+  - [x] 目录样式：自行添加了 `.markdown-toc`
+  - [ ] 自适应：px, em, rem，lib-flexible，px2rem-loader
 - [x] 无标题情况
 
 > 平滑滚动功能仅测试了 `Chrome`
 
-## 用法
-
-**直接** 引入 `markdown-toc.js` 即可。
-
-`index.html` 为使用示例。
-
-## 注意事项
+## 三、注意事项
 
 建议使用 `marked.js` 库来解析 `HTML` ，示例中 `getMarkdownHTML()` 这个方法，你会获得 `Markdown` 的对应 `HTML` ，以及生成目录所需要的数据（ `{text, level, anchor}` ）。
 
 >  `marked.js` 在生成目录的过程中的作用：获得目录数据。
 
-## TOC 思路
+## 四、美化
+
+在 `zhangjikai/markdown-css` 的基础上，结合 `github-markdown-css` 进行配置。
+
+- [x] 修改与整理：`.markdown-body`，
+- [x] 目录样式：自行添加了 `.markdown-toc`。
+- [ ] 自适应：px, em, rem：lib-flexible和px2rem-loader
+
+## 五、锚点唯一性
+
+此部分查看源码后一举击破，库本身就提供了此功能。
+
+之前自己确定锚点的唯一性是靠标题顺序（1，2，3...），但这次查看源码后，发现自己欠缺很多考虑，源码中调用 `slugger.slug` 有很多数据预处理，并提供了锚点唯一值。
+
+因为之后要添加目录，于是新增了 `toc.push({text, level, anchor})` ，其中的 `toc` 是用于存放各级标题数据的：
+
+```javascript
+ renderer.heading = function (text, level, raw, slugger) {
+    if (this.options.headerIds) {
+      // 遵循 options，如果 headerIds = false，也没必要制作 toc 了
+      let anchor = this.options.headerPrefix + slugger.slug(raw)
+      toc.push({text, level, anchor})
+      return `<h${level} id="#${anchor}">${text}</h${level}>`
+    }
+    // ignore IDs
+    return `<h${level}>${text}</h${level}>`
+  };
+```
+
+## 六、TOC 思路
 
 考虑的情况：标题并不是按顺序写的，也就是说，顺序是乱的：开局一个二级标题，接下来就是五级标题，三级标题这样。
 
@@ -106,30 +136,3 @@ toc.push({text, level, anchor})
 |      | -     | -             | -         |      |                         | 全弹出，从下至上，从右至左 |
 
 详细请查看代码：`markdown-toc_note.js` 文件，里面含有大量注释。
-
-## 锚点唯一性
-
-此部分查看源码后一举击破，库本身就提供了此功能。
-
-之前自己确定锚点的唯一性是靠标题顺序（1，2，3...），但这次查看源码后，发现自己欠缺很多考虑，源码中调用 `slugger.slu`g 有很多数据预处理，并提供了锚点唯一值。
-
-因为之后要添加目录，于是新增了 `toc.push({text, level, anchor})` ，其中的 `toc` 是用于存放各级标题数据的。
-
-相关源码:
-
-```javascript
- renderer.heading = function (text, level, raw, slugger) {
-    if (this.options.headerIds) {
-      // 遵循 options，如果 headerIds = false，也没必要制作 toc 了
-      let anchor = this.options.headerPrefix + slugger.slug(raw)
-      toc.push({text, level, anchor})
-      return `<h${level} id="#${anchor}">${text}</h${level}>`
-    }
-    // ignore IDs
-    return `<h${level}>${text}</h${level}>`
-  };
-```
-
-
-
-如果遇到了什么问题，或者有什么疑问，[请联系我](https://evgo2017)。

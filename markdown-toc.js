@@ -66,9 +66,9 @@
     if (!this.length) return
     this.tocs[this.index].style.color = showColor
     this.tocs.forEach(anchor => {
-      let scrollToBodyIndex = (index) => {
+      function scrollToBodyIndex(id){
         let step = 80, distance = 45, speed = 10 // step < distance * 2
-        let goalDom = this.anchorDOM.querySelector("[index='" + index + "']"),
+        let goalDom = document.getElementById(id.slice(1)),
           goal = goalDom.offsetTop - distance,
           now = document.documentElement.scrollTop + document.body.scrollTop
 
@@ -77,7 +77,7 @@
           if (Math.abs(goal - now) < distance) {
             clearInterval(s)
             window.scrollTo(0, goal) // 修正
-            window.location.hash = '#' + goalDom.id // 为了修改 URL 也是不容易
+            window.location.hash = id // 为了修改 URL 也是不容易
           } else {
             now += step
             window.scrollBy(0, step)
@@ -86,7 +86,7 @@
       }
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        scrollToBodyIndex(this.getAttribute('index'))
+        scrollToBodyIndex(this.getAttribute('href'))
         // 如果不需要在平滑滚动后修改 URL，下面这一句就够了
         // document.querySelector(this.getAttribute('href')).scrollIntoView({
         //   behavior: 'smooth'
